@@ -82,12 +82,12 @@ let query_title ?title () =
 
 let query_authors ?authors () =
   read_line ~prompt:"Authors (comma separated): " ?initial_text:authors ()
-  |> String.nsplit ~by:","
+  |> String.split_on_string ~by:","
   |> List.map String.strip
 
 let query_tags ?tags () =
   read_line ~prompt:"Tags (comma separated): " ?initial_text:tags ()
-  |> String.nsplit ~by:","
+  |> String.split_on_string ~by:","
   |> List.map String.strip
 
 let query_lang ?lang () =
@@ -104,7 +104,7 @@ let query_doc_infos ?infos doc_name =
 
 let query_sources (db_path: Path.t) =
   read_line ~prompt:"Sources (comma separated): " ()
-  |> String.nsplit ~by:","
+  |> String.split_on_string ~by:","
   |> List.map String.strip
   |> List.map (import_source ~check_file_exists:true db_path)
 
@@ -151,7 +151,7 @@ let query_multi_choices (choices: (char * string * 'a) list) =
 let file_already_exists (filename: Path.t) =
   Printf.printf "%s already exists (and is different). What do?\n"
     (Path.to_string filename);
-  
+
   match query_multi_choices [
     'r', "Rename the file to import", `R;
     'o', "Overwrite", `Overwrite;
@@ -163,15 +163,15 @@ let file_already_exists (filename: Path.t) =
     Printf.printf "Rename %s to: " (Path.name filename);
     let new_name = input_line stdin in
     `Rename (Path.map_name (const new_name) filename)
-      
+
   | `Overwrite -> `Overwrite
   | `Skip -> `Skip
   | `Quit -> `Quit
-    
+
 let docs_share_source (db_path: Path.t) doc1 doc2 =
   let open Document in
   let sort = (fun x -> List.sort compare x) in
-  
+
   if doc1.content.name = doc2.content.name &&
     (sort doc1.content.authors) = (sort doc2.content.authors)
   then
@@ -194,7 +194,7 @@ let docs_share_source (db_path: Path.t) doc1 doc2 =
 This isn't allowed. What do?\n\n";
     display_doc doc1; print_newline ();
     display_doc doc2; print_newline ();
-    
+
     match query_multi_choices [
       'f', "Keep the first, discard the second",
         `KeepOnlyFirst;
@@ -235,7 +235,7 @@ This isn't allowed. What do?\n\n";
           Failure e -> Printf.printf "Error: %s\n" e; get_sources () in
 
       let sources = get_sources () in
-      
+
       let tags = query_multi_choices [
         'f', "Use the first document's tag(s)", const doc1.content.tags;
         's', "Use the second document's tag(s)", const doc2.content.tags;
@@ -251,7 +251,7 @@ This isn't allowed. What do?\n\n";
       ] () in
 
       `MergeTo (title, authors, sources, tags, lang)
-        
+
     | `C -> `MergeTo (query_doc db_path)
 
     | `KeepOnlyFirst -> `KeepOnlyFirst

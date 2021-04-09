@@ -77,7 +77,7 @@ let eval_query_elt ?(exact_match = false) (elt: elt) (doc: Inner_db.document): f
         (0., 1.)
       else begin
         try
-          String.nsplit v ~by:" "
+          String.split_on_string ~by:" " v
           |> List.map (ldist u)
           |> List.fold_left (fun acc d -> acc ++ (0., d)) (0., 0.)
         with Not_found ->

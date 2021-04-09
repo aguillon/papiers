@@ -61,7 +61,7 @@ let explore_directory (dir: string) =
 
 let in_path (name: string): bool =
   Sys.getenv "PATH"
-  |> String.nsplit ~by:":"
+  |> String.split_on_string ~by:":"
   |> List.Exceptionless.find (fun dir ->
     Sys.file_exists (Filename.concat dir name))
   |> Option.is_some
